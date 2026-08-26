@@ -1,0 +1,11 @@
+[project]
+name = "literature-digest"
+version = "0.1.0"
+authors = [
+    { name = "Filip Szczypiński", email = "filip.t.szczypinski@durham.ac.uk" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "beautifulsoup4>=4.15.0",
+    "requests>=2.34.2",
+]

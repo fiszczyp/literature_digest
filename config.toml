@@ -1,0 +1,11 @@
+[weekly]
+# Order of appearance in the weekly TOC booklet
+journals = ["nature-chem", "chem", "jacs", "acie"]
+
+[paths]
+# Where you export your Zotero PDFs for the monthly digest
+monthly_raw = "monthly_raw"
+# Where you save HTML issue pages
+weekly_raw = "weekly_raw"
+# Where to save HTML files
+output_dir = "outputs"
