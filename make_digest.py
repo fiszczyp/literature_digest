@@ -46,35 +46,35 @@ def get_html_template(body_content, page_header_text):
             @page {{ size: A4 portrait; margin: 1cm; }}
             header, footer {{ display: none !important; }}
         }}
-        body {{ 
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
-            margin: 0 auto; padding: 20px; color: #1a1a1a; 
+        body {{
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            margin: 0 auto; padding: 20px; color: #1a1a1a;
             max-width: 850px; background-color: white;
         }}
-        .section-label {{ 
-            border-bottom: 2px solid #002f65; color: #002f65; 
-            font-size: 18px; font-weight: bold; margin: 30px 0 10px 0; 
-            text-transform: uppercase; 
+        .section-label {{
+            border-bottom: 2px solid #002f65; color: #002f65;
+            font-size: 18px; font-weight: bold; margin: 30px 0 10px 0;
+            text-transform: uppercase;
         }}
-        .article-row {{ 
-            display: flex; align-items: center; 
-            border-bottom: 1px solid #eee; padding: 8px 0; 
-            page-break-inside: avoid; 
+        .article-row {{
+            display: flex; align-items: center;
+            border-bottom: 1px solid #eee; padding: 8px 0;
+            page-break-inside: avoid;
         }}
         .text-content {{ flex: 1; padding-right: 20px; }}
         .title {{ font-size: 11.5px; font-weight: 800; line-height: 1.25; color: #002f65; margin-bottom: 3px; }}
-        
-        .authors, .doi {{ 
-            font-size: 9.5px; 
-            color: #444; 
-            margin-bottom: 3px; 
+
+        .authors, .doi {{
+            font-size: 9.5px;
+            color: #444;
+            margin-bottom: 3px;
             display: block;
             line-height: 1.3;
         }}
         .authors {{ font-style: italic; }}
-        .doi {{ 
-            font-family: monospace; 
-            text-decoration: none; 
+        .doi {{
+            font-family: monospace;
+            text-decoration: none;
         }}
         .doi:hover {{ text-decoration: underline; }}
 
@@ -169,6 +169,14 @@ def scrape_journal_body(input_files, journal_key):
                 doi_link = art.find("a", href=re.compile(r"doi\.org/10\."))
                 if doi_link:
                     item_id = doi_link["href"].split("doi.org/")[-1]
+
+                # FALLBACK FOR WILEY (ACIE/JACS/RSC relative paths)
+                if not item_id:
+                    w_link = art.find("a", href=re.compile(r"/doi/(abs/|full/|epdf/)?10\."))
+                    if w_link:
+                        # Extracts the part after /doi/ and removes potential prefixes
+                        path = w_link['href'].split('/doi/')[-1]
+                        item_id = re.sub(r"^(abs/|full/|epdf/)", "", path)
 
                 # Fallback for Nature paths
                 if not item_id:
