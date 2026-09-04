@@ -172,10 +172,11 @@ def scrape_journal_body(input_files, journal_key):
 
                 # FALLBACK FOR WILEY (ACIE/JACS/RSC relative paths)
                 if not item_id:
-                    w_link = art.find("a", href=re.compile(r"/doi/(abs/|full/|epdf/)?10\."))
+                    w_link = art.find(
+                        "a", href=re.compile(r"/doi/(abs/|full/|epdf/)?10\.")
+                    )
                     if w_link:
-                        # Extracts the part after /doi/ and removes potential prefixes
-                        path = w_link['href'].split('/doi/')[-1]
+                        path = w_link["href"].split("/doi/")[-1]
                         item_id = re.sub(r"^(abs/|full/|epdf/)", "", path)
 
                 # Fallback for Nature paths
@@ -185,6 +186,18 @@ def scrape_journal_body(input_files, journal_key):
                         item_id = f"10.1038/{n_link['href'].split('/')[-1]}"
 
                 # Fallback for Cell Press (Chem) paths
+                if not item_id or item_id.startswith("S"):
+                    # Search all text inside this article block for a DOI pattern
+                    # Cell Press usually has '10.1016/j.chempr...'
+                    # somewhere in the metadata spans
+                    text_search = art.get_text()
+                    doi_match = re.search(
+                        r"10\.\d{4,9}/[-._;()/:A-Z0-9]+", text_search, re.IGNORECASE
+                    )
+                    if doi_match:
+                        item_id = doi_match.group().strip(",.")
+
+                # Final fallback to PII if DOI absolutely not found
                 if not item_id:
                     c_link = art.find("a", href=re.compile(r"/fulltext/S"))
                     if c_link:
@@ -245,13 +258,13 @@ def scrape_journal_body(input_files, journal_key):
                     )  # Get large images for Chem
 
                 # Create clickable DOI link (or PII link for Cell Press)
-                link_url = (
-                    f"https://doi.org/{item_id}"
-                    if item_id.startswith("10.")
-                    else f"{base_url}/chem/fulltext/{item_id}"
-                )
+                if item_id.startswith("10."):
+                    link_url = f"https://doi.org/{item_id}"
+                else:
+                    link_url = f"{base_url}/fulltext/{item_id}"
+
                 doi_display = (
-                    f'<a class="doi" href="{link_url}" target="_blank">{item_id}</a>'
+                    f'<a class="doi" href="{link_url}" target="_blank">{link_url}</a>'
                 )
 
                 rows_html += f'''
